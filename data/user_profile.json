@@ -1,0 +1,6 @@
+{
+  "user": "khagani",
+  "preferred_topics": ["Tech", "Science", "World"],
+  "excluded_sources": ["sponsored.example.com"],
+  "max_items_per_topic": 3
+}

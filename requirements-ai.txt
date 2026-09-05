@@ -1,0 +1,15 @@
+# Dependencies needed to RUN the provided ai/ package.
+# Add your own SE-layer dependencies (aiohttp, beautifulsoup4, feedparser,
+# tenacity, asyncpg, fastapi/flask, etc.) to your project's main requirements.txt.
+
+numpy>=1.24
+pydantic>=2.7
+
+# Pick ONE or more depending on which provider(s) you intend to use.
+# (None of these are imported until the corresponding provider is selected.)
+anthropic>=0.39.0      ; extra == "anthropic"
+openai>=1.50.0         ; extra == "openai"
+google-genai>=0.3.0    ; extra == "gemini"
+
+# Smoke tests
+pytest>=8.0

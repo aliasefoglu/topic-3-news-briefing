@@ -1,0 +1,7 @@
+# Sample RSS feeds. One URL per line; lines starting with '#' are ignored.
+# These are well-known public feeds. For real testing you may use any RSS feed.
+http://feeds.bbci.co.uk/news/rss.xml
+http://rss.cnn.com/rss/edition.rss
+https://www.theguardian.com/world/rss
+https://feeds.npr.org/1001/rss.xml
+https://feeds.arstechnica.com/arstechnica/index/
