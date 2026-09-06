@@ -2,7 +2,7 @@
 They are used to standardize the data flow pipeline."""
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
 
 class TopicEnum(str, Enum):
@@ -70,9 +70,9 @@ class ProcessedArticle(BaseModel):
     """It shows a processed article ready for AI, with clean text and no duplicates
     Attributes are:
         - article_id: This is the reference ID which points to the original article.
-        - cleaned_content: This is the cleaned content of the article, with no HTML tags or special characters.
+        - article: This is the original article object.
+        - labeled_summary: This is the AI-generated summary of the article.
         - embedding: This is the vector representation of the cleaned content. It is used for semantic search and AI processing.
-        - cluster_id: This is the cluster ID which groups similar articles together. It is used for clustering and topic modeling.
     """
     article_id: str
     article: Article
@@ -83,7 +83,7 @@ class BriefingItem(BaseModel):
     """This class shows a final version AI-generated news summary
     Attributes are:
         - title: AI-generated title.
-        - summary: Bullet points of the article.
+        - summary: AI-generated summary of the article.
         - topic: The topic of the article, which is used for categorization and filtering.
         - source_urls: List of original reference links.
         - relevance_score: How well this news matches user interests (0.0 to 1.0).
@@ -104,4 +104,4 @@ class User(BaseModel):
     user_id: str
     preferred_topics: List[TopicEnum] = Field(default_factory=list)
     excluded_sources: List[str] = Field(default_factory=list)
-    preferred_length: str = 'medium'
+    preferred_length: Literal['short', 'medium', 'long'] = 'medium'
