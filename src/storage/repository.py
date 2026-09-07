@@ -97,8 +97,9 @@ class Repository:
         )
 
     async def save_processed_article(self, canonical_url: str, content_hash: str, labeled_summary: LabeledSummary) -> None:
-        """It Caches an AI-labeled article result.
-        The content hash is used as the conflict target to prevent the same article content from being cached more than once."""
+        """It caches an AI-labeled article result. 
+        The content hash is used as the conflict target. 
+        If the article already exists, its summary, topic, and sentiment are updated."""
         pool = self._get_pool()
         try:
             await pool.execute(
