@@ -91,7 +91,7 @@ class BriefingItem(BaseModel):
     title: str
     summary: str
     topic: TopicEnum
-    relevance_score: float
+    relevance_score: float = Field(ge=0.0, le=1.0)
     source_urls: List[str] = Field(default_factory=list)
 
 class User(BaseModel):
