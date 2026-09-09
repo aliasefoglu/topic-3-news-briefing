@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     fetch_timeout_seconds: int = 15
     max_parallel_fetches: int = 8
 
+    ## HTML-scrape source (satisfies "at least one direct-scraped HTML source")
+    html_scrape_url: str = "https://www.bbc.com/news/world"
+    html_scrape_source_name: str = "BBC World (scraped)"
+
+    ## Web UI session signing key. MUST be overridden via env in any real deployment.
+    session_secret_key: str = "change-me-in-production"
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
