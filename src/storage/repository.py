@@ -1,8 +1,9 @@
 import asyncpg
+from pathlib import Path
 from typing import Optional
 import json
 from src.config import settings
-from src.models import (LabeledSummary, SentimentEnum, TopicEnum, User)
+from src.models import (Account, LabeledSummary, SentimentEnum, TopicEnum, User)
 class Repository:
     """It provides asynchronous access to the PostgreSQL database"""
     def __init__(self) -> None:
@@ -34,6 +35,19 @@ class Repository:
         if self.pool is None:
             raise RuntimeError("Database connection pool is not initialized. Call connect() first.")
         return self.pool
+
+    _SCHEMA_PATH = Path(__file__).with_name("schema.sql")
+
+    async def init_schema(self) -> None:
+        """It creates the database schema if it does not already exist.
+        Idempotent: every statement in schema.sql uses IF NOT EXISTS, so calling
+        this on every application startup is safe."""
+        pool = self._get_pool()
+        ddl = self._SCHEMA_PATH.read_text(encoding="utf-8")
+        try:
+            await pool.execute(ddl)
+        except asyncpg.PostgresError as e:
+            raise RuntimeError(f"Failed to initialize database schema: {e}") from e
 
     async def get_user(self, user_id: str) -> Optional[User]:
         """It returns a user by ID, or None if the user does not exist."""
@@ -126,3 +140,40 @@ class Repository:
             return result is True
         except asyncpg.PostgresError as e:
             raise RuntimeError(f"Failed to check if URL {canonical_url} is processed in the database: {e}") from e
+
+# Account operations
+
+    async def create_account(self, user_id: str, password_hash: str) -> None:
+        """It registers a new login credential for an existing user row.
+        The caller must have already called save_user() for this user_id,
+        since accounts.user_id is a foreign key into users.user_id."""
+        pool = self._get_pool()
+        try:
+            await pool.execute(
+                """INSERT INTO accounts (user_id, password_hash, created_at)
+                   VALUES ($1, $2, now())""",
+                user_id,
+                password_hash,
+            )
+        except asyncpg.UniqueViolationError as e:
+            raise ValueError(f"Username {user_id!r} is already taken.") from e
+        except asyncpg.PostgresError as e:
+            raise RuntimeError(f"Failed to create account for {user_id}: {e}") from e
+
+    async def get_account(self, user_id: str) -> Optional[Account]:
+        """It returns the login credential for user_id, or None if not registered."""
+        pool = self._get_pool()
+        try:
+            row = await pool.fetchrow(
+                """SELECT user_id, password_hash, created_at FROM accounts WHERE user_id = $1""",
+                user_id,
+            )
+        except asyncpg.PostgresError as e:
+            raise RuntimeError(f"Failed to fetch account for {user_id}: {e}") from e
+        if row is None:
+            return None
+        return Account(
+            user_id=row["user_id"],
+            password_hash=row["password_hash"],
+            created_at=row["created_at"],
+        )
