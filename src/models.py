@@ -105,3 +105,16 @@ class User(BaseModel):
     preferred_topics: List[TopicEnum] = Field(default_factory=list)
     excluded_sources: List[str] = Field(default_factory=list)
     preferred_length: Literal['short', 'medium', 'long'] = 'medium'
+
+class Account(BaseModel):
+    """Login credentials for a user, kept separate from `User`'s topic
+    preferences (different lifecycle, different consumer -- the web UI's
+    auth flow vs. the digest pipeline's personalization logic).
+    Attributes are:
+        - user_id: References the same user_id used in `User`.
+        - password_hash: PBKDF2-HMAC-SHA256 hash, never the plaintext password.
+        - created_at: When the account was registered.
+    """
+    user_id: str
+    password_hash: str
+    created_at: datetime
